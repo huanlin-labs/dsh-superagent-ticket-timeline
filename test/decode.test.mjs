@@ -4,7 +4,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import zlib from 'node:zlib';
 import { decodeZstd, firstFrameOnly } from '../src/zstd-decode.mjs';
+
+// Node < 22.15 没有内建 zstd；"天真做法"那条对照用例需要它，否则只能 skip。
+const HAS_ZSTD = typeof zlib.zstdDecompressSync === 'function';
 import { twoFrames } from './helpers.mjs';
 import { findSamples } from '../verify/lib/samples.mjs';
 
@@ -71,7 +75,7 @@ test('真实会话日志：解出的行数与字符数自洽', { skip: samplePat
     `summary.lines=${summary.lines} 与实际切行 ${countedLines} 只允许差 1（末尾换行）`);
 });
 
-test('firstFrameOnly（天真做法）：整段喂 zstdDecompressSync 只得第一帧（本模块存在的理由）', () => {
+test('firstFrameOnly（天真做法）：整段喂 zstdDecompressSync 只得第一帧（本模块存在的理由）', { skip: HAS_ZSTD ? false : 'Node < 22.15 没有内建 zstd，无法演示"天真做法"' }, () => {
   const { both } = twoFrames('AAA\n', 'BBB\n');
   const full = decodeZstd(both);
   const naive = firstFrameOnly(both);
