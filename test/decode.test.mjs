@@ -75,13 +75,21 @@ test('真实会话日志：解出的行数与字符数自洽', { skip: samplePat
     `summary.lines=${summary.lines} 与实际切行 ${countedLines} 只允许差 1（末尾换行）`);
 });
 
-test('firstFrameOnly（天真做法）：整段喂 zstdDecompressSync 只得第一帧（本模块存在的理由）', { skip: HAS_ZSTD ? false : 'Node < 22.15 没有内建 zstd，无法演示"天真做法"' }, () => {
+test('firstFrameOnly（天真做法）：整段喂 zstdDecompressSync 视 Node 版本可能只解首帧（本模块存在的理由）', { skip: HAS_ZSTD ? false : 'Node < 22.15 没有内建 zstd，无法演示"天真做法"' }, () => {
   const { both } = twoFrames('AAA\n', 'BBB\n');
   const full = decodeZstd(both);
   const naive = firstFrameOnly(both);
-  assert.equal(naive.text, 'AAA\n', '天真做法只拿得到第一帧');
-  assert.ok(naive.text.length < full.text.length, `首帧 ${naive.text.length} 必须短于全量 ${full.text.length}`);
+  // 实测差异（别写死）：Node 24.18.0 只解出首帧；Node 24.22.2 已能一次解出全部帧。
+  // 所以这里只断言"天真做法只会是首帧或全量"，并把命中哪种打印出来。
+  assert.ok(
+    naive.text === 'AAA\n' || naive.text === 'AAA\nBBB\n',
+    `天真做法只该是首帧或全量，实际：${JSON.stringify(naive.text)}`,
+  );
+  assert.ok(naive.text.length <= full.text.length, `天真做法 ${naive.text.length} 不该超过全量 ${full.text.length}`);
   assert.equal(full.text, 'AAA\nBBB\n', '本模块要把两帧都拿到');
+  if (naive.text === full.text) {
+    console.log(`  ⚠ 本机 Node ${process.version} 的 zstdDecompressSync 已能跨帧解压：本模块的价值转为帧统计 / 截断标记 / 跳过 skippable / 逐帧回调`);
+  }
 });
 
 test('真实会话日志：天真做法拿到的永远不多于全量（且通常更少）', { skip: samplePath ? false : skipReason }, () => {
