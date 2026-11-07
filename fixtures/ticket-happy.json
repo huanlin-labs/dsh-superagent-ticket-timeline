@@ -1,0 +1,63 @@
+{
+  "_synthetic": "合成数据：本文件由本作品作者按 003-execution.md 的事件语义手工编排，不对应任何真实会话或真实 Ticket。",
+  "declaredEventCount": 8,
+  "ticket": {
+    "id": "tk-a1f3c9",
+    "title": "给导出接口补限流，100 rps",
+    "decisionId": "dec-2f81",
+    "strength": "explicit"
+  },
+  "events": [
+    {
+      "at": "2026-09-08T09:12:03.140Z",
+      "type": "ticket.created",
+      "ticketId": "tk-a1f3c9",
+      "title": "给导出接口补限流，100 rps",
+      "decisionId": "dec-2f81",
+      "strength": "explicit"
+    },
+    {
+      "at": "2026-09-08T09:12:04.020Z",
+      "type": "assignment.started",
+      "assignmentId": "as-1",
+      "state": "running"
+    },
+    {
+      "at": "2026-09-08T09:20:31.500Z",
+      "type": "report.progress",
+      "assignmentId": "as-1",
+      "summary": "读完导出链路，限流应该卡在 /export 路由入口，别放中间件里，否则批量下载也会被限"
+    },
+    {
+      "at": "2026-09-08T09:41:07.880Z",
+      "type": "input.trigger",
+      "triggerId": "tr-1",
+      "human": true,
+      "note": "阈值先按 100 rps，超了返 429 并带上 Retry-After，别直接拒绝连接"
+    },
+    {
+      "at": "2026-09-08T09:58:44.210Z",
+      "type": "report.progress",
+      "assignmentId": "as-1",
+      "summary": "Redis 令牌桶接好了，正在压测；改动落在 C:\\Users\\zhaorui-wu\\项目\\导出模块\\index.ts 和 redis.ts"
+    },
+    {
+      "at": "2026-09-08T10:15:02.640Z",
+      "type": "report.ready",
+      "assignmentId": "as-1",
+      "summary": "100 rps 生效，压测 10 分钟没有漏放；429 带 Retry-After: 1，文档也补了"
+    },
+    {
+      "at": "2026-09-08T10:16:30.000Z",
+      "type": "assignment.ended",
+      "assignmentId": "as-1",
+      "reason": "ready"
+    },
+    {
+      "at": "2026-09-08T10:18:11.900Z",
+      "type": "ticket.ended",
+      "by": "executor",
+      "outcome": "completed"
+    }
+  ]
+}

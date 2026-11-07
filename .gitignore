@@ -1,0 +1,16 @@
+# 本机 / 编辑器
+node_modules/
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
+
+# 运行产物（demo 输出、对照表、还原文本都别进仓）
+out/
+*.mapping.json
+restored.txt
+redacted.txt
+
+# 临时
+tmp/
+.tmp/

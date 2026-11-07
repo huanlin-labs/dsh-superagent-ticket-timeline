@@ -1,0 +1,74 @@
+{
+  "_synthetic": "合成数据：本文件由本作品作者按 003-execution.md 的事件语义手工编排，不对应任何真实会话或真实 Ticket。",
+  "declaredEventCount": 10,
+  "ticket": {
+    "id": "tk-b7e204",
+    "title": "排查 CI 流水线偶发超时",
+    "decisionId": "dec-9a3d",
+    "strength": "explicit"
+  },
+  "events": [
+    {
+      "at": "2026-09-09T14:02:11.000Z",
+      "type": "ticket.created",
+      "ticketId": "tk-b7e204",
+      "title": "排查 CI 流水线偶发超时",
+      "decisionId": "dec-9a3d",
+      "strength": "explicit"
+    },
+    {
+      "at": "2026-09-09T14:02:12.400Z",
+      "type": "assignment.started",
+      "assignmentId": "as-1",
+      "state": "running"
+    },
+    {
+      "at": "2026-09-09T14:06:55.000Z",
+      "type": "report.progress",
+      "assignmentId": "as-1",
+      "summary": "翻了最近 30 次构建，超时都集中在 e2e 阶段，且都在整点后的头两分钟"
+    },
+    {
+      "at": "2026-09-09T14:22:38.770Z",
+      "type": "report.blocked",
+      "assignmentId": "as-1",
+      "summary": "卡住了：e2e 要连 staging 的 Redis 才能跑完，我这边没有凭据。需要你给可用的实例地址和只读令牌"
+    },
+    {
+      "at": "2026-09-09T14:40:12.005Z",
+      "type": "input.trigger",
+      "triggerId": "tr-2",
+      "human": true,
+      "note": "staging 是 10.8.0.14:6379，只读令牌 ghp_9f8e7d6c5b4a3210，用完记得下线。有问题发 zhaorui-wu@example.com"
+    },
+    {
+      "at": "2026-09-09T14:52:19.480Z",
+      "type": "report.progress",
+      "assignmentId": "as-1",
+      "summary": "连上了，e2e 重跑三轮；顺手把 connect 超时从 30s 降到 3s 再观察"
+    },
+    {
+      "at": "2026-09-09T15:10:44.900Z",
+      "type": "report.ready",
+      "assignmentId": "as-1",
+      "summary": "三轮全绿。根因是 CI runner 的 DNS 抖动，跟我们代码无关；已把 DNS 重试加到 runner 镜像里"
+    },
+    {
+      "at": "2026-09-09T15:12:00.000Z",
+      "type": "assignment.ended",
+      "assignmentId": "as-1",
+      "reason": "ready"
+    },
+    {
+      "at": "2026-09-09T15:13:20.100Z",
+      "type": "input.note",
+      "text": "（人工补充）下游告警阈值也太紧，另开单跟进，不在本次范围"
+    },
+    {
+      "at": "2026-09-09T15:14:20.300Z",
+      "type": "ticket.ended",
+      "by": "executor",
+      "outcome": "completed"
+    }
+  ]
+}

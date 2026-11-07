@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tk-happy · Ticket 时间线</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --card:#f9fafb;
+    --accent:#2563eb; --warn:#b45309; --danger:#b91c1c; --shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+  html[data-theme="dark"]{
+    --bg:#0b0f17; --fg:#e5e7eb; --muted:#9ca3af; --line:#1f2937; --card:#111827;
+    --accent:#60a5fa; --warn:#fbbf24; --danger:#f87171; --shadow:0 1px 2px rgba(0,0,0,.5);
+  }
+  @media (prefers-color-scheme: dark){
+    html[data-theme="auto"]{
+      --bg:#0b0f17; --fg:#e5e7eb; --muted:#9ca3af; --line:#1f2937; --card:#111827;
+      --accent:#60a5fa; --warn:#fbbf24; --danger:#f87171; --shadow:0 1px 2px rgba(0,0,0,.5);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 18px}
+  .hrow{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+  h1{font-size:16px;margin:0;font-weight:650}
+  .meta{color:var(--muted);font-size:12px}
+  .cards{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;box-shadow:var(--shadow)}
+  .card b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+  .card span{color:var(--muted);font-size:11px}
+  .card.bad b{color:var(--danger)} .card.warn b{color:var(--warn)}
+  button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 10px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .wrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0;min-height:calc(100vh - 96px)}
+  aside{border-right:1px solid var(--line);padding:14px;position:sticky;top:96px;align-self:start;max-height:calc(100vh - 96px);overflow:auto}
+  aside h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+  aside h2:first-child{margin-top:0}
+  .chk{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:13px;cursor:pointer}
+  .chk i{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block}
+  main{padding:14px 18px 60vh;overflow:hidden}
+  ol.tl{list-style:none;margin:0;padding:0}
+  .ev{display:grid;grid-template-columns:104px 18px minmax(0,1fr);align-items:start;gap:8px;padding:5px 0;border-top:1px dashed transparent}
+  .ev.hidden{display:none}
+  .ev .t{position:sticky;left:0;align-self:start;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;background:var(--bg);padding:2px 0}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:5px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent)}
+  .row1{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .badge{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+  .sum{min-width:0}
+  .ev--report .sum{font-weight:600}
+  .ev--report .dot{width:13px;height:13px;margin-top:3px}
+  .ev--human .sum::after{content:" · 人类介入";color:var(--muted);font-size:11px;font-weight:400}
+  details{margin:2px 0 0}
+  summary{cursor:pointer;color:var(--muted);font-size:11px;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ "}
+  details[open] summary::before{content:"▾ "}
+  pre{margin:6px 0 2px;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:auto;font-size:12px}
+  .empty{padding:24px;color:var(--muted)}
+  @media (max-width:760px){ .wrap{grid-template-columns:1fr} aside{position:static;border-right:0;border-bottom:1px solid var(--line);max-height:none} }
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <h1>tk-happy · 修复登录页在 Safari 下白屏</h1>
+    <span class="meta">决策 — / —</span>
+    <span class="meta" id="count">11 条事件</span>
+    <button id="theme" type="button" title="切换深浅色">深浅色</button>
+  </div>
+  <div class="cards">
+    <div class="card"><b>person&#47;review</b><span>当前阶段</span></div>
+    <div class="card"><b>30m</b><span>跨度</span></div>
+    <div class="card"><b>11</b><span>事件</span></div>
+    <div class="card"><b>2</b><span>人类介入</span></div>
+    <div class="card "><b>0</b><span>失败</span></div>
+    <div class="card "><b>0</b><span>重试</span></div>
+    <div class="card"><b>已结束</b><span>Ticket 状态</span></div>
+  </div>
+</header>
+<div class="wrap">
+  <aside>
+    <h2>阶段泳道</h2>
+    <label class="chk"><input type="checkbox" data-role="stage" value="working&#47;queued" checked><i style="--c:#2563eb"></i>working&#47;queued</label>
+      <label class="chk"><input type="checkbox" data-role="stage" value="working" checked><i style="--c:#16a34a"></i>working</label>
+      <label class="chk"><input type="checkbox" data-role="stage" value="person&#47;review" checked><i style="--c:#0e7490"></i>person&#47;review</label>
+      <label class="chk"><input type="checkbox" data-role="stage" value="person&#47;answer" checked><i style="--c:#b8860b"></i>person&#47;answer</label>
+    <h2>类别</h2>
+    <label class="chk"><input type="checkbox" data-role="cat" value="ticket" checked>建单&#47;结束</label>
+      <label class="chk"><input type="checkbox" data-role="cat" value="assignment" checked>派发</label>
+      <label class="chk"><input type="checkbox" data-role="cat" value="input" checked>输入</label>
+      <label class="chk"><input type="checkbox" data-role="cat" value="report" checked>汇报</label>
+      <label class="chk"><input type="checkbox" data-role="cat" value="attention" checked>提问</label>
+    <h2>只看</h2>
+    <label class="chk"><input type="checkbox" id="humanOnly">仅人类介入</label>
+    <label class="chk"><input type="checkbox" id="reportsHeavy" checked>报告加重显示</label>
+  </aside>
+  <main>
+    <ol class="tl" id="timeline">
+<li class="ev  " id="ev-0" data-stage="working&#47;queued" data-cat="ticket" data-human="0">
+  <time class="t" datetime="2026-09-01T09:00:00.000Z">09:00:00.000</time>
+  <span class="dot" style="--c:#2563eb"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#2563eb">working&#47;queued</span><span class="sum">建单：修复登录页在 Safari 下白屏</span></div>
+    <details><summary>原始事件 · ticket.created</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:00:00.000Z&quot;,
+  &quot;type&quot;: &quot;ticket.created&quot;,
+  &quot;ticketId&quot;: &quot;tk-happy&quot;,
+  &quot;title&quot;: &quot;修复登录页在 Safari 下白屏&quot;,
+  &quot;decisionId&quot;: &quot;dec-1&quot;,
+  &quot;strength&quot;: &quot;explicit&quot;,
+  &quot;index&quot;: 0,
+  &quot;atMs&quot;: 1788253200000,
+  &quot;iso&quot;: &quot;2026-09-01T09:00:00.000Z&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  " id="ev-1" data-stage="working" data-cat="assignment" data-human="0">
+  <time class="t" datetime="2026-09-01T09:00:01.000Z">09:00:01.000</time>
+  <span class="dot" style="--c:#16a34a"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#16a34a">working</span><span class="sum">worker 开工（as-0）</span></div>
+    <details><summary>原始事件 · assignment.started</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:00:01.000Z&quot;,
+  &quot;type&quot;: &quot;assignment.started&quot;,
+  &quot;assignmentId&quot;: &quot;as-0&quot;,
+  &quot;state&quot;: &quot;running&quot;,
+  &quot;index&quot;: 1,
+  &quot;atMs&quot;: 1788253201000,
+  &quot;iso&quot;: &quot;2026-09-01T09:00:01.000Z&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  ev--human" id="ev-2" data-stage="working" data-cat="input" data-human="1">
+  <time class="t" datetime="2026-09-01T09:00:02.000Z">09:00:02.000</time>
+  <span class="dot" style="--c:#16a34a"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#16a34a">working</span><span class="sum">人说话（tr-1）</span></div>
+    <details><summary>原始事件 · input.trigger</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:00:02.000Z&quot;,
+  &quot;type&quot;: &quot;input.trigger&quot;,
+  &quot;triggerId&quot;: &quot;tr-1&quot;,
+  &quot;human&quot;: true,
+  &quot;index&quot;: 2,
+  &quot;atMs&quot;: 1788253202000,
+  &quot;iso&quot;: &quot;2026-09-01T09:00:02.000Z&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev ev--report " id="ev-3" data-stage="working" data-cat="report" data-human="0">
+  <time class="t" datetime="2026-09-01T09:01:00.000Z">09:01:00.000</time>
+  <span class="dot" style="--c:#16a34a"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#16a34a">working</span><span class="sum">汇报 progress：已经复现白屏，正在定位 Safari 的兼容分支</span></div>
+    <details><summary>原始事件 · report.progress</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:01:00.000Z&quot;,
+  &quot;type&quot;: &quot;report.progress&quot;,
+  &quot;assignmentId&quot;: &quot;as-0&quot;,
+  &quot;summary&quot;: &quot;已经复现白屏，正在定位 Safari 的兼容分支&quot;,
+  &quot;index&quot;: 3,
+  &quot;atMs&quot;: 1788253260000,
+  &quot;iso&quot;: &quot;2026-09-01T09:01:00.000Z&quot;,
+  &quot;shape&quot;: &quot;report&quot;,
+  &quot;state&quot;: &quot;progress&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev ev--report " id="ev-4" data-stage="working" data-cat="report" data-human="0">
+  <time class="t" datetime="2026-09-01T09:06:00.000Z">09:06:00.000</time>
+  <span class="dot" style="--c:#16a34a"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#16a34a">working</span><span class="sum">汇报 progress：改完 polyfill，本地 Safari 18 通过</span></div>
+    <details><summary>原始事件 · report.progress</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:06:00.000Z&quot;,
+  &quot;type&quot;: &quot;report.progress&quot;,
+  &quot;assignmentId&quot;: &quot;as-0&quot;,
+  &quot;summary&quot;: &quot;改完 polyfill，本地 Safari 18 通过&quot;,
+  &quot;index&quot;: 4,
+  &quot;atMs&quot;: 1788253560000,
+  &quot;iso&quot;: &quot;2026-09-01T09:06:00.000Z&quot;,
+  &quot;shape&quot;: &quot;report&quot;,
+  &quot;state&quot;: &quot;progress&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev ev--report " id="ev-5" data-stage="person&#47;review" data-cat="report" data-human="0">
+  <time class="t" datetime="2026-09-01T09:10:00.000Z">09:10:00.000</time>
+  <span class="dot" style="--c:#0e7490"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#0e7490">person&#47;review</span><span class="sum">汇报 ready：修复完成，改动 42 行，等你过一眼</span></div>
+    <details><summary>原始事件 · report.ready</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:10:00.000Z&quot;,
+  &quot;type&quot;: &quot;report.ready&quot;,
+  &quot;assignmentId&quot;: &quot;as-0&quot;,
+  &quot;summary&quot;: &quot;修复完成，改动 42 行，等你过一眼&quot;,
+  &quot;index&quot;: 5,
+  &quot;atMs&quot;: 1788253800000,
+  &quot;iso&quot;: &quot;2026-09-01T09:10:00.000Z&quot;,
+  &quot;shape&quot;: &quot;report&quot;,
+  &quot;state&quot;: &quot;ready&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  " id="ev-6" data-stage="person&#47;review" data-cat="assignment" data-human="0">
+  <time class="t" datetime="2026-09-01T09:11:00.000Z">09:11:00.000</time>
+  <span class="dot" style="--c:#0e7490"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#0e7490">person&#47;review</span><span class="sum">worker 收工（as-0）：ready</span></div>
+    <details><summary>原始事件 · assignment.ended</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:11:00.000Z&quot;,
+  &quot;type&quot;: &quot;assignment.ended&quot;,
+  &quot;assignmentId&quot;: &quot;as-0&quot;,
+  &quot;reason&quot;: &quot;ready&quot;,
+  &quot;index&quot;: 6,
+  &quot;atMs&quot;: 1788253860000,
+  &quot;iso&quot;: &quot;2026-09-01T09:11:00.000Z&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  " id="ev-7" data-stage="person&#47;review" data-cat="input" data-human="0">
+  <time class="t" datetime="2026-09-01T09:12:00.000Z">09:12:00.000</time>
+  <span class="dot" style="--c:#0e7490"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#0e7490">person&#47;review</span><span class="sum">注记：CI 已绿，可以收尾</span></div>
+    <details><summary>原始事件 · input.note</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:12:00.000Z&quot;,
+  &quot;type&quot;: &quot;input.note&quot;,
+  &quot;text&quot;: &quot;CI 已绿，可以收尾&quot;,
+  &quot;index&quot;: 7,
+  &quot;atMs&quot;: 1788253920000,
+  &quot;iso&quot;: &quot;2026-09-01T09:12:00.000Z&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  " id="ev-8" data-stage="person&#47;answer" data-cat="attention" data-human="0">
+  <time class="t" datetime="2026-09-01T09:15:00.000Z">09:15:00.000</time>
+  <span class="dot" style="--c:#b8860b"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#b8860b">person&#47;answer</span><span class="sum">向人提问：这个 polyfill 要不要同时打进 legacy 构建？</span></div>
+    <details><summary>原始事件 · attention.raised</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:15:00.000Z&quot;,
+  &quot;type&quot;: &quot;attention.raised&quot;,
+  &quot;question&quot;: &quot;这个 polyfill 要不要同时打进 legacy 构建？&quot;,
+  &quot;index&quot;: 8,
+  &quot;atMs&quot;: 1788254100000,
+  &quot;iso&quot;: &quot;2026-09-01T09:15:00.000Z&quot;,
+  &quot;shape&quot;: &quot;attention&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  ev--human" id="ev-9" data-stage="person&#47;review" data-cat="attention" data-human="1">
+  <time class="t" datetime="2026-09-01T09:20:00.000Z">09:20:00.000</time>
+  <span class="dot" style="--c:#0e7490"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#0e7490">person&#47;review</span><span class="sum">提问已处理</span></div>
+    <details><summary>原始事件 · attention.cleared</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:20:00.000Z&quot;,
+  &quot;type&quot;: &quot;attention.cleared&quot;,
+  &quot;index&quot;: 9,
+  &quot;atMs&quot;: 1788254400000,
+  &quot;iso&quot;: &quot;2026-09-01T09:20:00.000Z&quot;,
+  &quot;shape&quot;: &quot;attention&quot;
+}</pre></details>
+  </div>
+</li>
+<li class="ev  " id="ev-10" data-stage="person&#47;review" data-cat="ticket" data-human="0">
+  <time class="t" datetime="2026-09-01T09:30:00.000Z">09:30:00.000</time>
+  <span class="dot" style="--c:#0e7490"></span>
+  <div class="body">
+    <div class="row1"><span class="badge" style="--c:#0e7490">person&#47;review</span><span class="sum">结束：completed（由 executor）</span></div>
+    <details><summary>原始事件 · ticket.ended</summary><pre>{
+  &quot;at&quot;: &quot;2026-09-01T09:30:00.000Z&quot;,
+  &quot;type&quot;: &quot;ticket.ended&quot;,
+  &quot;by&quot;: &quot;executor&quot;,
+  &quot;outcome&quot;: &quot;completed&quot;,
+  &quot;index&quot;: 10,
+  &quot;atMs&quot;: 1788255000000,
+  &quot;iso&quot;: &quot;2026-09-01T09:30:00.000Z&quot;
+}</pre></details>
+  </div>
+</li>
+    </ol>
+    <p class="empty" id="empty" hidden>当前筛选下没有事件。</p>
+  </main>
+</div>
+
+<script type="application/json" id="ticket-data">{"meta":{"ticketId":"tk-happy","title":"修复登录页在 Safari 下白屏","decisionId":null,"strength":null,"currentStage":"person\/review","spanMs":1800000,"spanText":"30m","eventCount":11,"humanInputs":2,"failures":0,"retries":0,"ended":true},"stages":["working\/queued","working","person\/review","person\/answer"],"categories":["ticket","assignment","input","report","attention"],"items":[{"id":"ev-0","index":0,"at":"2026-09-01T09:00:00.000Z","atMs":1788253200000,"clock":"09:00:00.000","stage":"working\/queued","cat":"ticket","human":false,"type":"ticket.created","summary":"建单：修复登录页在 Safari 下白屏","raw":{"at":"2026-09-01T09:00:00.000Z","type":"ticket.created","ticketId":"tk-happy","title":"修复登录页在 Safari 下白屏","decisionId":"dec-1","strength":"explicit","index":0,"atMs":1788253200000,"iso":"2026-09-01T09:00:00.000Z"}},{"id":"ev-1","index":1,"at":"2026-09-01T09:00:01.000Z","atMs":1788253201000,"clock":"09:00:01.000","stage":"working","cat":"assignment","human":false,"type":"assignment.started","summary":"worker 开工（as-0）","raw":{"at":"2026-09-01T09:00:01.000Z","type":"assignment.started","assignmentId":"as-0","state":"running","index":1,"atMs":1788253201000,"iso":"2026-09-01T09:00:01.000Z"}},{"id":"ev-2","index":2,"at":"2026-09-01T09:00:02.000Z","atMs":1788253202000,"clock":"09:00:02.000","stage":"working","cat":"input","human":true,"type":"input.trigger","summary":"人说话（tr-1）","raw":{"at":"2026-09-01T09:00:02.000Z","type":"input.trigger","triggerId":"tr-1","human":true,"index":2,"atMs":1788253202000,"iso":"2026-09-01T09:00:02.000Z"}},{"id":"ev-3","index":3,"at":"2026-09-01T09:01:00.000Z","atMs":1788253260000,"clock":"09:01:00.000","stage":"working","cat":"report","human":false,"type":"report.progress","summary":"汇报 progress：已经复现白屏，正在定位 Safari 的兼容分支","raw":{"at":"2026-09-01T09:01:00.000Z","type":"report.progress","assignmentId":"as-0","summary":"已经复现白屏，正在定位 Safari 的兼容分支","index":3,"atMs":1788253260000,"iso":"2026-09-01T09:01:00.000Z","shape":"report","state":"progress"}},{"id":"ev-4","index":4,"at":"2026-09-01T09:06:00.000Z","atMs":1788253560000,"clock":"09:06:00.000","stage":"working","cat":"report","human":false,"type":"report.progress","summary":"汇报 progress：改完 polyfill，本地 Safari 18 通过","raw":{"at":"2026-09-01T09:06:00.000Z","type":"report.progress","assignmentId":"as-0","summary":"改完 polyfill，本地 Safari 18 通过","index":4,"atMs":1788253560000,"iso":"2026-09-01T09:06:00.000Z","shape":"report","state":"progress"}},{"id":"ev-5","index":5,"at":"2026-09-01T09:10:00.000Z","atMs":1788253800000,"clock":"09:10:00.000","stage":"person\/review","cat":"report","human":false,"type":"report.ready","summary":"汇报 ready：修复完成，改动 42 行，等你过一眼","raw":{"at":"2026-09-01T09:10:00.000Z","type":"report.ready","assignmentId":"as-0","summary":"修复完成，改动 42 行，等你过一眼","index":5,"atMs":1788253800000,"iso":"2026-09-01T09:10:00.000Z","shape":"report","state":"ready"}},{"id":"ev-6","index":6,"at":"2026-09-01T09:11:00.000Z","atMs":1788253860000,"clock":"09:11:00.000","stage":"person\/review","cat":"assignment","human":false,"type":"assignment.ended","summary":"worker 收工（as-0）：ready","raw":{"at":"2026-09-01T09:11:00.000Z","type":"assignment.ended","assignmentId":"as-0","reason":"ready","index":6,"atMs":1788253860000,"iso":"2026-09-01T09:11:00.000Z"}},{"id":"ev-7","index":7,"at":"2026-09-01T09:12:00.000Z","atMs":1788253920000,"clock":"09:12:00.000","stage":"person\/review","cat":"input","human":false,"type":"input.note","summary":"注记：CI 已绿，可以收尾","raw":{"at":"2026-09-01T09:12:00.000Z","type":"input.note","text":"CI 已绿，可以收尾","index":7,"atMs":1788253920000,"iso":"2026-09-01T09:12:00.000Z"}},{"id":"ev-8","index":8,"at":"2026-09-01T09:15:00.000Z","atMs":1788254100000,"clock":"09:15:00.000","stage":"person\/answer","cat":"attention","human":false,"type":"attention.raised","summary":"向人提问：这个 polyfill 要不要同时打进 legacy 构建？","raw":{"at":"2026-09-01T09:15:00.000Z","type":"attention.raised","question":"这个 polyfill 要不要同时打进 legacy 构建？","index":8,"atMs":1788254100000,"iso":"2026-09-01T09:15:00.000Z","shape":"attention"}},{"id":"ev-9","index":9,"at":"2026-09-01T09:20:00.000Z","atMs":1788254400000,"clock":"09:20:00.000","stage":"person\/review","cat":"attention","human":true,"type":"attention.cleared","summary":"提问已处理","raw":{"at":"2026-09-01T09:20:00.000Z","type":"attention.cleared","index":9,"atMs":1788254400000,"iso":"2026-09-01T09:20:00.000Z","shape":"attention"}},{"id":"ev-10","index":10,"at":"2026-09-01T09:30:00.000Z","atMs":1788255000000,"clock":"09:30:00.000","stage":"person\/review","cat":"ticket","human":false,"type":"ticket.ended","summary":"结束：completed（由 executor）","raw":{"at":"2026-09-01T09:30:00.000Z","type":"ticket.ended","by":"executor","outcome":"completed","index":10,"atMs":1788255000000,"iso":"2026-09-01T09:30:00.000Z"}}]}</script>
+<script>
+(function () {
+  var data = JSON.parse(document.getElementById('ticket-data').textContent);
+  var root = document.documentElement;
+  var items = Array.prototype.slice.call(document.querySelectorAll('#timeline .ev'));
+  var countEl = document.getElementById('count');
+  var emptyEl = document.getElementById('empty');
+
+  function active(role) {
+    return Array.prototype.slice.call(document.querySelectorAll('input[data-role="' + role + '"]:checked'))
+      .map(function (el) { return el.value; });
+  }
+
+  function apply() {
+    var stages = active('stage');
+    var cats = active('cat');
+    var humanOnly = document.getElementById('humanOnly').checked;
+    var shown = 0;
+    items.forEach(function (el) {
+      var ok = stages.indexOf(el.dataset.stage) >= 0
+        && cats.indexOf(el.dataset.cat) >= 0
+        && (!humanOnly || el.dataset.human === '1');
+      el.classList.toggle('hidden', !ok);
+      if (ok) shown += 1;
+    });
+    countEl.textContent = shown + ' / ' + items.length + ' 条事件';
+    emptyEl.hidden = shown !== 0;
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[data-role]'), function (el) {
+    el.addEventListener('change', apply);
+  });
+  document.getElementById('humanOnly').addEventListener('change', apply);
+
+  // 报告视觉重量：可手动关掉（对比看细节用）
+  document.getElementById('reportsHeavy').addEventListener('change', function () {
+    document.body.classList.toggle('flat-reports', !this.checked);
+  });
+
+  // 深浅色：auto → light → dark 循环，选择记进 localStorage（file:// 下可能被拒，忽略即可）
+  var order = ['auto', 'light', 'dark'];
+  var label = { auto: '跟随系统', light: '浅色', dark: '深色' };
+  var saved = null;
+  try { saved = localStorage.getItem('tt-theme'); } catch (e) { saved = null; }
+  if (saved && order.indexOf(saved) >= 0) root.dataset.theme = saved;
+  document.getElementById('theme').textContent = '主题：' + label[root.dataset.theme || 'auto'];
+  document.getElementById('theme').addEventListener('click', function () {
+    var next = order[(order.indexOf(root.dataset.theme || 'auto') + 1) % order.length];
+    root.dataset.theme = next;
+    this.textContent = '主题：' + label[next];
+    try { localStorage.setItem('tt-theme', next); } catch (e) { /* 忽略 */ }
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>

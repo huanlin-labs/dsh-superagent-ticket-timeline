@@ -1,0 +1,32 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20', '22', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: 版本
+        run: node -v && npm -v
+      # 零第三方依赖：不需要 npm install
+      - name: 单元测试（node --test）
+        run: npm test
+      - name: 端到端冒烟（三个子命令 --help + 真实 fixture 跑一遍）
+        run: |
+          node bin/ticket-timeline.mjs --help
+          node bin/ticket-timeline.mjs ticket fixtures/ticket-blocked-retry.json --no-color | head -5
+          node bin/ticket-timeline.mjs ticket fixtures/ticket-happy.json --json > /tmp/demo.json
+          node bin/ticket-timeline.mjs render --in /tmp/demo.json --out /tmp/demo.html
+          test -s /tmp/demo.html
+          node bin/ticket-timeline.mjs unmap --help

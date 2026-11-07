@@ -1,0 +1,21 @@
+{
+  "name": "dsh-ticket-timeline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "把 dsh-superagent 的 Ticket 事件流与 DSH 会话日志渲染成脱敏、可直读的时间线（CLI 一行出结论、单文件 HTML 双击可看）",
+  "type": "module",
+  "bin": {
+    "ticket-timeline": "bin/ticket-timeline.mjs"
+  },
+  "engines": {
+    "node": ">=22.15"
+  },
+  "scripts": {
+    "test": "node --test",
+    "verify": "node verify/check-frames.mjs && node verify/check-decode.mjs && node verify/check-ticket-events.mjs && node verify/check-stage.mjs && node verify/check-timeline.mjs && node verify/check-redact-map.mjs && node verify/check-redact-leak.mjs && node verify/check-render-text.mjs && node verify/check-render-html.mjs && node verify/check-cli.mjs && node verify/check-fixtures.mjs"
+  },
+  "files": [
+    "bin",
+    "src"
+  ]
+}

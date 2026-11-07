@@ -1,0 +1,81 @@
+{
+  "_synthetic": "合成数据：本文件由本作品作者按 003-execution.md 的事件语义手工编排，不对应任何真实会话或真实 Ticket。",
+  "declaredEventCount": 11,
+  "ticket": {
+    "id": "tk-c05d18",
+    "title": "把去年的历史工单归档掉",
+    "decisionId": "dec-4c7e",
+    "strength": "explicit"
+  },
+  "events": [
+    {
+      "at": "2026-09-10T20:30:05.610Z",
+      "type": "ticket.created",
+      "ticketId": "tk-c05d18",
+      "title": "把去年的历史工单归档掉",
+      "decisionId": "dec-4c7e",
+      "strength": "explicit"
+    },
+    {
+      "at": "2026-09-10T20:30:07.900Z",
+      "type": "assignment.started",
+      "assignmentId": "as-1",
+      "state": "running"
+    },
+    {
+      "at": "2026-09-10T20:44:16.220Z",
+      "type": "report.progress",
+      "assignmentId": "as-1",
+      "summary": "扫到 1.2 万条存量工单，按年切分后先处理最早那批"
+    },
+    {
+      "at": "2026-09-10T21:02:33.410Z",
+      "type": "report.dropped",
+      "assignmentId": "as-1",
+      "summary": "超出这次的时间盒，人已经不在线了；先放下，等你回来再续"
+    },
+    {
+      "at": "2026-09-10T21:02:40.000Z",
+      "type": "assignment.ended",
+      "assignmentId": "as-1",
+      "reason": "dropped"
+    },
+    {
+      "at": "2026-09-11T09:05:12.700Z",
+      "type": "input.trigger",
+      "triggerId": "tr-3",
+      "human": true,
+      "note": "早上好，那个归档脚本接着跑，只处理去年（2025 年）的，别动今年的"
+    },
+    {
+      "at": "2026-09-11T09:06:44.150Z",
+      "type": "assignment.started",
+      "assignmentId": "as-2",
+      "state": "running"
+    },
+    {
+      "at": "2026-09-11T09:31:58.300Z",
+      "type": "report.progress",
+      "assignmentId": "as-2",
+      "summary": "按 2025 年过滤后剩 3800 条，已归档 1200 条，脚本在 D:\\工作区\\实习\\产出\\归档脚本\\run.ps1"
+    },
+    {
+      "at": "2026-09-11T09:52:10.660Z",
+      "type": "report.ready",
+      "assignmentId": "as-2",
+      "summary": "3800 条全部归档完成，明细表已出；有疑问发 zhaorui-wu@example.com"
+    },
+    {
+      "at": "2026-09-11T09:53:30.000Z",
+      "type": "assignment.ended",
+      "assignmentId": "as-2",
+      "reason": "ready"
+    },
+    {
+      "at": "2026-09-11T09:55:02.100Z",
+      "type": "ticket.ended",
+      "by": "human",
+      "outcome": "completed"
+    }
+  ]
+}
